@@ -1,3 +1,5 @@
+import time
+
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledText
@@ -18,6 +20,9 @@ class Kappa(ttk.Frame):
         image_path = "red.png"
         pil_image = Image.open(image_path).resize((16, 16))
         self.img_red = ImageTk.PhotoImage(pil_image)
+        image_path = "gray.png"
+        pil_image = Image.open(image_path).resize((16, 16))
+        self.img_gray = ImageTk.PhotoImage(pil_image)
         self.type_var = ttk.StringVar(value='ip')
         self.ip = ttk.StringVar(value='10.1.4.157')
         # self.connection_state = "Нет подключения"
@@ -64,82 +69,16 @@ class Kappa(ttk.Frame):
         self.create_get_set_pars_buttons()
         self.var_lf = {}
         for i in range(4):
-            var_name = f'mod{i + 1}'
+            # var_name = f'mod{i + 1}'
             col = ttk.Frame(self)
             # col.grid(row=0, column=(i // 2) + 1, sticky=NSEW)
             if i % 2 == 0:
                 col.grid(row=0, column=(i // 2) + 1, sticky=NSEW, pady=(15, 0), padx=15)
             else:
                 col.grid(row=1, column=(i // 2) + 1, sticky=NSEW, padx=15)
-            self.var_lf[var_name] = ttk.LabelFrame(col, text=i + 1)
-            self.var_lf[var_name].pack(fill=BOTH, expand=YES, pady=(0, 15))
-            # global alarm_rf, alarm_tmp, alarm_vol, alarm_cur, alarm_vswr
-            fr_par_num = ttk.Frame(self.var_lf[var_name])
-            fr_par_num.pack(fill=X)
-            mod_num = ttk.Label(fr_par_num, text='Номер модуля:')
-            mod_num.pack(side=LEFT, anchor=N, padx=15, pady=(15, 5))
-            var_num_name = f'var_num_{i + 1}'
-            var_rf_out = ttk.Label(fr_par_num, textvariable='var_num_name')
-            var_rf_out.pack(side=LEFT, anchor=N, fill=X, pady=(15, 5))
-            self.setvar('var_num_name', '-')
-            fr_par_rf = ttk.Frame(self.var_lf[var_name])
-            fr_par_rf.pack(fill=X)
-            lbl_rf_out = ttk.Label(fr_par_rf, text='Мощность RF:')
-            lbl_rf_out.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
-            var_rf_out = ttk.Label(fr_par_rf, textvariable='var_rf')
-            var_rf_out.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5), padx=(0, 15))
-            self.setvar('var_rf', '-')
-            alarm_rf_name = f'alarm_rf_{i + 1}'
-            self.var_lf[alarm_rf_name] = ttk.Label(fr_par_rf, image=self.img_red)
-            self.var_lf[alarm_rf_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
-            fr_par_tmp = ttk.Frame(self.var_lf[var_name])
-            fr_par_tmp.pack(fill=X)
-            lbl_tmp = ttk.Label(fr_par_tmp, text='Температура:')
-            lbl_tmp.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
-            var_tmp = ttk.Label(fr_par_tmp, textvariable='var_tmp')
-            var_tmp.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5), padx=(0, 15))
-            self.setvar('var_tmp', '-')
-            alarm_tmp_name = f'alarm_tmp_{i + 1}'
-            self.var_lf[alarm_tmp_name] = ttk.Label(fr_par_tmp, image=self.img_red)
-            self.var_lf[alarm_tmp_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
-            fr_par_vol = ttk.Frame(self.var_lf[var_name])
-            fr_par_vol.pack(fill=X)
-            lbl_tmp = ttk.Label(fr_par_vol, text='Напряжение:')
-            lbl_tmp.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
-            var_tmp = ttk.Label(fr_par_vol, textvariable='var_vol')
-            var_tmp.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
-            self.setvar('var_vol', '-')
-            alarm_vol_name = f'alarm_vol_{i + 1}'
-            self.var_lf[alarm_vol_name] = ttk.Label(fr_par_vol, image=self.img_red)
-            self.var_lf[alarm_vol_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
-            fr_par_cur = ttk.Frame(self.var_lf[var_name])
-            fr_par_cur.pack(fill=X)
-            lbl_tmp = ttk.Label(fr_par_cur, text='Потребление:')
-            lbl_tmp.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
-            var_tmp = ttk.Label(fr_par_cur, textvariable='var_cur')
-            var_tmp.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
-            self.setvar('var_cur', '-')
-            alarm_cur_name = f'alarm_cur_{i + 1}'
-            self.var_lf[alarm_cur_name] = ttk.Label(fr_par_cur, image=self.img_red)
-            self.var_lf[alarm_cur_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
-            fr_par_vswr = ttk.Frame(self.var_lf[var_name])
-            fr_par_vswr.pack(fill=X)
-            lbl_tmp = ttk.Label(fr_par_vswr, text='КСВ:')
-            lbl_tmp.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
-            var_tmp = ttk.Label(fr_par_vswr, textvariable='var_vswr')
-            var_tmp.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
-            self.setvar('var_vswr', '-')
-            alarm_vswr_name = f'alarm_vswr_{i + 1}'
-            self.var_lf[alarm_vswr_name] = ttk.Label(fr_par_vswr, image=self.img_red)
-            self.var_lf[alarm_vswr_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
-            # rf_switch = 0
-            rf_switch_name = f'rf_switch_{i + 1}'
-            self.setvar(rf_switch_name, 0)
-            rf_sw = ttk.Checkbutton(master=self.var_lf[var_name],
-                                    text='Кнопка вкл. RF',
-                                    bootstyle='danger-round-toggle',
-                                    variable=rf_switch_name)
-            rf_sw.pack(side=LEFT, anchor=N, padx=(15, 5))
+            mod_name = ttk.LabelFrame(col, text=i + 1)
+            mod_name.pack(fill=BOTH, expand=YES, pady=(0, 15))
+            self.make_device(i, mod_name)
         # col2 = ttk.Frame(self)
         # col2.grid(row=0, column=1, sticky=NSEW)
         # self.option_lf_pars = ttk.LabelFrame(col2, text="Параметры")
@@ -150,6 +89,121 @@ class Kappa(ttk.Frame):
         self.option_lf_logs = ttk.LabelFrame(log_bar, text="Лог")
         self.option_lf_logs.pack(fill=BOTH, expand=YES, pady=15, padx=15)
         self.create_log_bar()
+
+    def make_device(self, i, m_name):
+        # global alarm_rf, alarm_tmp, alarm_vol, alarm_cur, alarm_vswr
+        fr_par_num = ttk.Frame(m_name)
+        fr_par_num.pack(fill=X)
+        # номер модуля
+        mod_num = ttk.Label(fr_par_num, text='Номер модуля:')
+        mod_num.pack(side=LEFT, anchor=N, padx=15, pady=(15, 5))
+
+        var_num_name = f'var_num_{i + 1}'
+        var_num = ttk.Label(fr_par_num, textvariable=var_num_name)
+        var_num.pack(side=LEFT, anchor=N, fill=X, pady=(15, 5))
+        self.setvar(var_num_name, '-')
+        # Диапазон частот
+        fr_freqs = ttk.Frame(m_name)
+        fr_freqs.pack(fill=X)
+
+        lbl_freqs = ttk.Label(fr_freqs, text='Частоты:')
+        lbl_freqs.pack(side=LEFT, anchor=E, padx=15, pady=(0, 5))
+
+        var_freq_min_name = f'var_freq_min_{i + 1}'
+        var_freq_min = ttk.Entry(fr_freqs, textvariable=var_freq_min_name, width=4, state=DISABLED)
+        var_freq_min.pack(side=LEFT, anchor=N, fill=X)
+        self.setvar(var_freq_min_name, '-')
+
+        lbl_freqs = ttk.Label(fr_freqs, text='—')
+        lbl_freqs.pack(side=LEFT, anchor=E, padx=5, pady=(0, 5))
+
+        var_freq_max_name = f'var_freq_max_{i + 1}'
+        var_freq_max = ttk.Entry(fr_freqs, textvariable=var_freq_max_name, width=4, state=DISABLED)
+        var_freq_max.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5), padx=(0, 15))
+        self.setvar(var_freq_max_name, '-')
+        # Мощность
+        fr_par_rf = ttk.Frame(m_name)
+        fr_par_rf.pack(fill=X)
+
+        lbl_rf_out = ttk.Label(fr_par_rf, text='Мощность RF:')
+        lbl_rf_out.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+
+        var_rf_name = f'var_rf_{i + 1}'
+        var_rf_out = ttk.Label(fr_par_rf, textvariable=var_rf_name)
+        var_rf_out.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5), padx=(0, 15))
+        self.setvar(var_rf_name, '-')
+
+        alarm_rf_name = f'alarm_rf_{i + 1}'
+        self.var_lf[alarm_rf_name] = ttk.Label(fr_par_rf, image=self.img_gray)
+        self.var_lf[alarm_rf_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # Температура
+        fr_par_tmp = ttk.Frame(m_name)
+        fr_par_tmp.pack(fill=X)
+
+        lbl_tmp = ttk.Label(fr_par_tmp, text='Температура:')
+        lbl_tmp.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+
+        var_tmp_name = f'var_tmp_{i + 1}'
+        var_tmp = ttk.Label(fr_par_tmp, textvariable=var_tmp_name)
+        var_tmp.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5), padx=(0, 15))
+        self.setvar(var_tmp_name, '-')
+
+        alarm_tmp_name = f'alarm_tmp_{i + 1}'
+        self.var_lf[alarm_tmp_name] = ttk.Label(fr_par_tmp, image=self.img_red)
+        self.var_lf[alarm_tmp_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # Напряжение
+        fr_par_vol = ttk.Frame(m_name)
+        fr_par_vol.pack(fill=X)
+
+        lbl_vol = ttk.Label(fr_par_vol, text='Напряжение:')
+        lbl_vol.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+
+        var_vol_name = f'var_vol_{i + 1}'
+        var_vol = ttk.Label(fr_par_vol, textvariable=var_vol_name)
+        var_vol.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
+        self.setvar(var_vol_name, '-')
+
+        alarm_vol_name = f'alarm_vol_{i + 1}'
+        self.var_lf[alarm_vol_name] = ttk.Label(fr_par_vol, image=self.img_red)
+        self.var_lf[alarm_vol_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # Потребление тока
+        fr_par_cur = ttk.Frame(m_name)
+        fr_par_cur.pack(fill=X)
+
+        lbl_сur = ttk.Label(fr_par_cur, text='Потребление:')
+        lbl_сur.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+
+        var_cur_name = f'var_cur_{i + 1}'
+        var_cur = ttk.Label(fr_par_cur, textvariable=var_cur_name)
+        var_cur.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
+        self.setvar(var_cur_name, '-')
+
+        alarm_cur_name = f'alarm_cur_{i + 1}'
+        self.var_lf[alarm_cur_name] = ttk.Label(fr_par_cur, image=self.img_red)
+        self.var_lf[alarm_cur_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # КСВ
+        fr_par_vswr = ttk.Frame(m_name)
+        fr_par_vswr.pack(fill=X)
+
+        lbl_vswr = ttk.Label(fr_par_vswr, text='КСВ:')
+        lbl_vswr.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+
+        var_vswr_name = f'var_vswr_{i + 1}'
+        var_vswr = ttk.Label(fr_par_vswr, textvariable=var_vswr_name)
+        var_vswr.pack(side=LEFT, anchor=N, fill=X, pady=(0, 5))
+        self.setvar(var_vswr_name, '-')
+
+        alarm_vswr_name = f'alarm_vswr_{i + 1}'
+        self.var_lf[alarm_vswr_name] = ttk.Label(fr_par_vswr, image=self.img_red)
+        self.var_lf[alarm_vswr_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # Кнопка
+        rf_switch_name = f'rf_switch_{i + 1}'
+        self.setvar(rf_switch_name, 0)
+        rf_sw = ttk.Checkbutton(master=m_name,
+                                text='Кнопка вкл. RF',
+                                bootstyle='danger-round-toggle',
+                                variable=rf_switch_name)
+        rf_sw.pack(side=LEFT, anchor=N, padx=(15, 5))
 
     def create_log_bar(self):
         # txt = ttk.Label(master=self.option_lf_logs, text='ЛОГИ')
@@ -254,6 +308,7 @@ class Kappa(ttk.Frame):
             self.opt_ip_inp['state'] = NORMAL
 
     def on_connect(self):
+        global sock
         sock = False
         if self.type_var.get() == 'com':
             global con
@@ -274,22 +329,11 @@ class Kappa(ttk.Frame):
                 sock.settimeout(5)
                 sock.connect((self.ip.get(), 5000))
                 print(f'Подключен к {self.ip.get()}:5000')
-                # query = DDS.get_address_query()
-                query = b'7e010013ff009db37f'
-                print(query)
-                # logs_box.insert(END, "Запрос " + ' '.join(query[i:i + 2] for i in range(0, len(query), 2)) + "\n")
-                byte_data = bytes.fromhex('7e010013ff009db37f')
-                sock.sendall(byte_data)
-                response = sock.recv(1024)
-                # print(response)
-                print(' '.join(response.hex()[i:i + 2] for i in range(0, len(response.hex()), 2)))
-                # if response:
-                #     logs_box.insert(END,
-                #                     "Ответ " + ' '.join(response[i:i + 2] for i in range(0, len(response), 2)) + "\n")
+                self.get_mod_address(self.type_var.get())
             except Exception as e:
                 print(e)
             finally:
-                if 'sock' in locals() and sock:
+                if 'sock' in globals() and sock:
                     sock.close()
                     print('Соединение отключено')
 
@@ -307,23 +351,131 @@ class Kappa(ttk.Frame):
             self.setvar('con_st', 'ОШИБКА ОТКЛЮЧЕНИЯ')
             logs_box.insert(END, "ОШИБКА ОТКЛЮЧЕНИЯ\n")
 
-    def get_mod_address(self):
-        query = DDS.get_address_query()
-        # logs_box.insert(END, "Запрос" + query + "\n")
-        logs_box.insert(END, "Запрос " + ' '.join(query[i:i+2] for i in range(0, len(query), 2)) + "\n")
-        response = DDS.send_query(con, query)
-        if response:
-            global module_number
-            module_number = response[-8:-6]
-            mod_n_text = 'Номер модуля - 0x' + module_number + ', ' + str(int(module_number, 16))
-            self.setvar('mod_addr', mod_n_text)
-            logs_box.insert(END, "Ответ " + ' '.join(response[i:i+2] for i in range(0, len(response), 2)) + "\n")
-            logs_box.insert(END, mod_n_text + "\n")
-            btn_get_par['state'] = NORMAL
-            btn_set_par['state'] = NORMAL
+    def get_mod_address(self, mode):
+        if mode == 'com':
+            query = DDS.get_address_query()
+            # logs_box.insert(END, "Запрос" + query + "\n")
+            logs_box.insert(END, "Запрос " + ' '.join(query[i:i+2] for i in range(0, len(query), 2)) + "\n")
+            response = DDS.send_query(con, query)
+            if response:
+                global module_number
+                module_number = response[-8:-6]
+                mod_n_text = 'Номер модуля - 0x' + module_number + ', ' + str(int(module_number, 16))
+                self.setvar('mod_addr', mod_n_text)
+                logs_box.insert(END, "Ответ " + ' '.join(response[i:i+2] for i in range(0, len(response), 2)) + "\n")
+                logs_box.insert(END, mod_n_text + "\n")
+                btn_get_par['state'] = NORMAL
+                btn_set_par['state'] = NORMAL
+            else:
+                self.setvar('mod_addr', 'Не удалось получить номер модуля')
+                logs_box.insert(END, "Не удалось получить номер модуля\n")
+        elif mode == 'ip':
+            query = b'7e010013ff009db37f'
+            query_par = b'7e010011ff00fddd7f'
+            responses = []
+            for i, q in enumerate([query, query_par]):
+                print(q)
+                logs_box.insert(END, "Запрос " + ' '.join(q.decode()[i:i + 2] for i in range(0, len(q.decode()), 2)) + "\n")
+                byte_data = bytes.fromhex(q.decode())
+                sock.sendall(byte_data)
+                responses.append(sock.recv(1024))
+                print(' '.join(responses[i].hex()[j:j + 2] for j in range(0, len(responses[i].hex()), 2)))
+                if responses[i]:
+                    logs_box.insert(END,
+                                    "Ответ " + ' '.join(responses[i].hex()[j:j + 2] for j in range(0, len(responses[i].hex()), 2))
+                                    + "\n")
+                time.sleep(0.3)
+            self.set_mod_data(responses)
+
+
+
         else:
-            self.setvar('mod_addr', 'Не удалось получить номер модуля')
-            logs_box.insert(END, "Не удалось получить номер модуля\n")
+            print('Непонятен тип подключения')
+
+    def set_mod_data(self, r):
+        resp_mod_num = r[0].hex()
+        print(resp_mod_num)
+        modules = []
+        if resp_mod_num[:10] == '7e01001300':
+            lenght = resp_mod_num[10:12]
+            for i in range(int(int(lenght, 16)/9)):
+                mod_info = resp_mod_num[12+9*i*2:12+(i+1)*9*2]
+                print(i, mod_info)
+                mod_number = int((mod_info[2:4] + mod_info[:2]), 16)
+                # self.setvar('var_num_' + str(i + 1), mod_number)
+                start_freq = int((mod_info[6:8] + mod_info[4:6]), 16)
+                # self.setvar('var_freq_min_' + str(i + 1), start_freq)
+                stop_freq = int((mod_info[10:12] + mod_info[8:10]), 16)
+                # self.setvar('var_freq_max_' + str(i + 1), stop_freq)
+                modules.append({'mod_num': mod_number, 'start_freq': start_freq, 'stop_freq': stop_freq})
+                print(f'{mod_number}, {start_freq} - {stop_freq}')
+        resp_mod_data = r[1].hex()
+        print(resp_mod_data)
+        if resp_mod_data[:10] == '7e01001100':
+            print(resp_mod_data[10:])
+            lenght = resp_mod_data[10:12]
+            mod_datas = resp_mod_data[20:]
+            for i in range(int((int(lenght, 16) - 4)/8)):
+                mod_data = mod_datas[i*8*2:(i+1)*8*2]
+                print(i, mod_data)
+                mod_number_from_mod_data = int((mod_data[2:4] + mod_data[:2]), 16)
+                mod_rf = str(int(mod_data[4:6], 16)) + ' дБм'
+                # self.setvar('var_rf_' + str(i + 1), mod_rf)
+                mod_tmp = str(int(mod_data[6:8], 16)) + '℃'
+                # self.setvar('var_tmp_' + str(i + 1), mod_tmp)
+                mod_vol = str(int(mod_data[8:10], 16)) + 'В'
+                # self.setvar('var_vol_' + str(i + 1), mod_vol)
+                mod_cur = str(int(mod_data[10:12], 16)) + 'А'
+                # self.setvar('var_cur_' + str(i + 1), mod_cur)
+                mod_vswr = int(mod_data[12:14], 16)/10
+                # self.setvar('var_vswr_' + str(i + 1), mod_vswr)
+                alarm_bit = bin(int(mod_data[14:16], 16))[2:].zfill(8)
+                mod_addition_data = {'rf': mod_rf,
+                                     'tmp': mod_tmp,
+                                     'vol': mod_vol,
+                                     'cur': mod_cur,
+                                     'vswr': mod_vswr,
+                                     'rf_switch': alarm_bit[-1],
+                                     'alarm_tmp': alarm_bit[-2],
+                                     'alarm_vol': alarm_bit[-3],
+                                     'alarm_cur': alarm_bit[-4],
+                                     'alarm_vswr': alarm_bit[-5]
+                                     }
+                for mod in modules:
+                    if mod['mod_num'] == mod_number_from_mod_data:
+                        mod.update(mod_addition_data)
+                        break
+        print(modules)
+        for i, mod in enumerate(modules):
+            self.setvar('var_num_' + str(i + 1), mod['mod_num'])
+            self.setvar('var_freq_min_' + str(i + 1), mod['start_freq'])
+            self.setvar('var_freq_max_' + str(i + 1), mod['stop_freq'])
+            self.setvar('var_rf_' + str(i + 1), mod['rf'])
+            self.setvar('var_tmp_' + str(i + 1), mod['tmp'])
+            self.setvar('var_vol_' + str(i + 1), mod['vol'])
+            self.setvar('var_cur_' + str(i + 1), mod['cur'])
+            self.setvar('var_vswr_' + str(i + 1), mod['vswr'])
+            self.setvar('rf_switch_' + str(i + 1), mod['rf_switch'])
+            alarm_tmp_name = 'alarm_tmp_' + str(i + 1)
+            if mod['alarm_tmp'] == '1':
+                self.var_lf[alarm_tmp_name].config(image=self.img_red)
+            else:
+                self.var_lf[alarm_tmp_name].config(image=self.img_green)
+            alarm_vol_name = 'alarm_vol_' + str(i + 1)
+            if mod['alarm_vol'] == '1':
+                self.var_lf[alarm_vol_name].config(image=self.img_red)
+            else:
+                self.var_lf[alarm_vol_name].config(image=self.img_green)
+            alarm_cur_name = 'alarm_cur_' + str(i + 1)
+            if mod['alarm_cur'] == '1':
+                self.var_lf[alarm_cur_name].config(image=self.img_red)
+            else:
+                self.var_lf[alarm_cur_name].config(image=self.img_green)
+            alarm_vswr_name = 'alarm_vswr_' + str(i + 1)
+            if mod['alarm_vswr'] == '1':
+                self.var_lf[alarm_vswr_name].config(image=self.img_red)
+            else:
+                self.var_lf[alarm_vswr_name].config(image=self.img_green)
 
     def get_par(self):
         # if module_number:
