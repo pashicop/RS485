@@ -1,9 +1,8 @@
 import time
-
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledText
-from ttkbootstrap.tableview import Tableview
+# from ttkbootstrap.tableview import Tableview
 from PIL import Image, ImageTk
 import DDS
 import socket
@@ -52,7 +51,7 @@ class Kappa(ttk.Frame):
                                      variable=self.type_var,
                                      value='com')
         opt_rb_com.pack(side=LEFT, padx=30, pady=(0, 10))
-        self.option_lf = ttk.LabelFrame(row0, text="Подключение к COM порту")
+        self.option_lf = ttk.LabelFrame(row0, text="Подключение к устройству")
         self.option_lf.pack(fill=BOTH, expand=YES, pady=(0, 15), padx=15)
         # self.option_lf.columnconfigure(0, weight=1)
         # self.option_lf.rowconfigure(0, weight=1)
@@ -170,8 +169,8 @@ class Kappa(ttk.Frame):
         fr_par_cur = ttk.Frame(m_name)
         fr_par_cur.pack(fill=X)
 
-        lbl_сur = ttk.Label(fr_par_cur, text='Потребление:')
-        lbl_сur.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
+        lbl_cur = ttk.Label(fr_par_cur, text='Потребление:')
+        lbl_cur.pack(side=LEFT, anchor=N, padx=15, pady=(0, 5))
 
         var_cur_name = f'var_cur_{i + 1}'
         var_cur = ttk.Label(fr_par_cur, textvariable=var_cur_name)
@@ -196,20 +195,32 @@ class Kappa(ttk.Frame):
         alarm_vswr_name = f'alarm_vswr_{i + 1}'
         self.var_lf[alarm_vswr_name] = ttk.Label(fr_par_vswr, image=self.img_red)
         self.var_lf[alarm_vswr_name].pack(side=RIGHT, anchor=N, fill=X, padx=(20, 40))
+        # Модуль установки RF
+        power_fr = ttk.Frame(m_name)
+        power_fr.pack(fill=X)
+        lbl_rf_pow = ttk.Label(power_fr, text='Мощность')
+        lbl_rf_pow.pack(side=LEFT, anchor=E, padx=15, pady=(0, 5))
+        # Задать мощность
+        rf_power_name = f'rf_power_{i + 1}'
+        self.setvar(rf_power_name, '')
+        rf_power = ttk.Entry(master=power_fr, textvariable=rf_power_name, width=2)
+        rf_power.pack(side=LEFT, anchor=N, padx=(15, 5), pady=(10, 15))
+        lbl_rf_pow = ttk.Label(power_fr, text='дБм')
+        lbl_rf_pow.pack(side=LEFT, anchor=E, padx=15, pady=(0, 5))
         # Кнопка
         rf_switch_name = f'rf_switch_{i + 1}'
         self.setvar(rf_switch_name, 0)
-        rf_sw = ttk.Checkbutton(master=m_name,
-                                text='Кнопка вкл. RF',
+        rf_sw = ttk.Checkbutton(master=power_fr,
+                                # text='',
                                 bootstyle='danger-round-toggle',
                                 variable=rf_switch_name)
-        rf_sw.pack(side=LEFT, anchor=N, padx=(15, 5))
+        rf_sw.pack(side=RIGHT, anchor=W, padx=(15, 35))
 
     def create_log_bar(self):
         # txt = ttk.Label(master=self.option_lf_logs, text='ЛОГИ')
         # txt.pack(fill=X, expand=YES, padx=15, pady=(0, 15))
         global logs_box
-        logs_box = ScrolledText(master=self.option_lf_logs, height=10)
+        logs_box = ScrolledText(master=self.option_lf_logs, height=10, hbar=True)
         logs_box.pack(fill=X, expand=YES, padx=15, pady=15)
         logs_box.insert(END, 'Программа готова к работе\n')
 
@@ -293,11 +304,17 @@ class Kappa(ttk.Frame):
     def create_get_set_pars_buttons(self):
         container = ttk.Frame(self.option_lf_mod)
         container.pack(fill=BOTH, expand=YES)
-        global btn_get_par, btn_set_par
+        global btn_get_par, btn_set_par, btn_set_par_test1, btn_set_par_test2
         btn_get_par = ttk.Button(master=container, text="Получить", command=self.get_par, state=DISABLED)
         btn_get_par.pack(side=LEFT, padx=15, pady=15)
         btn_set_par = ttk.Button(master=container, text="Загрузить", command=self.set_par, state=DISABLED)
         btn_set_par.pack(side=LEFT, padx=15, pady=15)
+        container2 = ttk.Frame(self.option_lf_mod)
+        container2.pack(fill=BOTH, expand=YES)
+        btn_set_par_test1 = ttk.Button(master=container2, text="Тест 1", command=lambda: self.set_par_test(True), state=DISABLED)
+        btn_set_par_test1.pack(side=LEFT, padx=15, pady=15)
+        btn_set_par_test2 = ttk.Button(master=container2, text="Тест 2", command=lambda: self.set_par_test(False), state=DISABLED)
+        btn_set_par_test2.pack(side=LEFT, padx=15, pady=15)
 
     def on_type_selection(self):
         print(self.type_var.get())
@@ -329,6 +346,12 @@ class Kappa(ttk.Frame):
                 sock.settimeout(5)
                 sock.connect((self.ip.get(), 5000))
                 print(f'Подключен к {self.ip.get()}:5000')
+                l_text = 'ПОДКЛЮЧЕНО к ' + self.ip.get() + ':5000'
+                self.setvar('con_st', l_text)
+                btn_discon['state'] = NORMAL
+                btn_set_par['state'] = NORMAL
+                btn_set_par_test1['state'] = NORMAL
+                btn_set_par_test2['state'] = NORMAL
                 self.get_mod_address(self.type_var.get())
             except Exception as e:
                 print(e)
@@ -378,17 +401,20 @@ class Kappa(ttk.Frame):
                 logs_box.insert(END, "Запрос " + ' '.join(q.decode()[i:i + 2] for i in range(0, len(q.decode()), 2)) + "\n")
                 byte_data = bytes.fromhex(q.decode())
                 sock.sendall(byte_data)
-                responses.append(sock.recv(1024))
+                try:
+                    data = sock.recv(1024)
+                    if data:
+                        responses.append(data)
+                except Exception as e:
+                    print(f'Какая-то ошибка - {e}')
                 print(' '.join(responses[i].hex()[j:j + 2] for j in range(0, len(responses[i].hex()), 2)))
                 if responses[i]:
                     logs_box.insert(END,
                                     "Ответ " + ' '.join(responses[i].hex()[j:j + 2] for j in range(0, len(responses[i].hex()), 2))
                                     + "\n")
+                    logs_box.see(END)
                 time.sleep(0.3)
             self.set_mod_data(responses)
-
-
-
         else:
             print('Непонятен тип подключения')
 
@@ -518,7 +544,84 @@ class Kappa(ttk.Frame):
         pass
 
     def set_par(self):
+        # test_query = b'7e010020ff52fddd0a00200368036a0384038603b603b803d40328010f00fc082e09380974097e09a609c409280a28011e0020034c0400000000000000000000000028007300580220030000000000000000000000002800ca487f'
+        # sock = False
+        # try:
+        #     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #     sock.settimeout(5)
+        #     sock.connect((self.ip.get(), 5000))
+        #     print(f'Подключен к {self.ip.get()}:5000')
+        #     l_text = 'ПОДКЛЮЧЕНО к ' + self.ip.get() + ':5000'
+        #     self.setvar('con_st', l_text)
+        #     btn_discon['state'] = NORMAL
+        #     btn_set_par['state'] = NORMAL
+        #     response = ''
+        #     print(test_query)
+        #     logs_box.insert(END,
+        #                     "Запрос " + ' '.join(test_query.decode()[i:i + 2] for i in range(0, len(test_query.decode()), 2)) + "\n")
+        #     byte_data = bytes.fromhex(test_query.decode())
+        #     sock.sendall(byte_data)
+        #     try:
+        #         response = sock.recv(1024)
+        #     except Exception as e:
+        #         print(f'Какая-то ошибка - {e}')
+        #     print(' '.join(response.hex()[j:j + 2] for j in range(0, len(response.hex()), 2)))
+        #     if response:
+        #         logs_box.insert(END,
+        #                         "Ответ " + ' '.join(
+        #                             response.hex()[j:j + 2] for j in range(0, len(response.hex()), 2))
+        #                         + "\n")
+        #         logs_box.see(END)
+        #     time.sleep(0.3)
+        #     self.set_mod_data(response)
+        # except Exception as e:
+        #     print(e)
+        # finally:
+        #     if 'sock' in globals() and sock:
+        #         sock.close()
+        #         print('Соединение отключено')
         pass
+
+    def set_par_test(self, on=True):
+        if on:
+            test_query = b'7e010020ff52fddd0a00200368036a0384038603b603b803d40328010f00fc082e09380974097e09a609c409280a28011e0020034c0400000000000000000000000028007300580220030000000000000000000000002800ca487f'
+        else:
+            test_query = b'7e010020ff52fddd0a00200368036a0384038603b603b803d40328000f00fc082e09380974097e09a609c409280a28001e0020034c0400000000000000000000000028007300580220030000000000000000000000002800ca487f'
+        sock = False
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(5)
+            sock.connect((self.ip.get(), 5000))
+            print(f'Подключен к {self.ip.get()}:5000')
+            l_text = 'ПОДКЛЮЧЕНО к ' + self.ip.get() + ':5000'
+            self.setvar('con_st', l_text)
+            btn_discon['state'] = NORMAL
+            btn_set_par['state'] = NORMAL
+            response = ''
+            print(test_query)
+            logs_box.insert(END,
+                            "Запрос " + ' '.join(test_query.decode()[i:i + 2] for i in range(0, len(test_query.decode()), 2)) + "\n")
+            byte_data = bytes.fromhex(test_query.decode())
+            sock.sendall(byte_data)
+            try:
+                response = sock.recv(1024)
+            except Exception as e:
+                print(f'Какая-то ошибка - {e}')
+            print(' '.join(response.hex()[j:j + 2] for j in range(0, len(response.hex()), 2)))
+            if response:
+                logs_box.insert(END,
+                                "Ответ " + ' '.join(
+                                    response.hex()[j:j + 2] for j in range(0, len(response.hex()), 2))
+                                + "\n")
+                logs_box.see(END)
+            time.sleep(0.3)
+            self.set_mod_data(response)
+        except Exception as e:
+            print(e)
+        finally:
+            if 'sock' in globals() and sock:
+                sock.close()
+                print('Соединение отключено')
 
 
 if __name__ == '__main__':
