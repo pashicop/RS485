@@ -24,67 +24,81 @@ class Kappa(ttk.Frame):
         self.img_gray = ImageTk.PhotoImage(pil_image)
         self.type_var = ttk.StringVar(value='ip')
         self.ip = ttk.StringVar(value='10.1.4.157')
-        # self.connection_state = "Нет подключения"
-        # self.columnconfigure(0, weight=1)
-        # self.columnconfigure(1, weight=1)
-        # self.columnconfigure(2, weight=1)
-        # self.rowconfigure(0, weight=1)
-        # self.rowconfigure(1, weight=1)
-        # self.rowconfigure(2, weight=1)
-        row0 = ttk.Frame(self)
-        row0.grid(row=0, column=0, sticky=NSEW)
-        opt_ip = ttk.LabelFrame(row0, text="Тип подключения")
-        opt_ip.pack(fill=BOTH, expand=YES, pady=15, padx=15)
-        type_con = ttk.Frame(master=opt_ip)
-        type_con.pack(fill=BOTH, expand=YES)
-        opt_rb_ip = ttk.Radiobutton(type_con,
+
+        header = ttk.Frame(self)
+        header.pack(side=TOP, fill=BOTH, expand=YES)
+
+        self.con_frame = ttk.LabelFrame(header, text="Тип подключения")
+        self.con_frame.pack(side=LEFT, padx=5, pady=5)
+
+        con_ip = ttk.Frame(master=self.con_frame)
+        con_ip.pack(fill=BOTH, expand=YES, pady=0, ipady=0)
+        opt_rb_ip = ttk.Radiobutton(con_ip,
                                     text='IP',
                                     command=self.on_type_selection,
                                     variable=self.type_var,
                                     value='ip')
         opt_rb_ip.pack(side=LEFT, padx=30, pady=(0, 5))
-        self.opt_ip_inp = ttk.Entry(type_con, textvariable=self.ip)
+
+        self.opt_ip_inp = ttk.Entry(con_ip, textvariable=self.ip)
         self.opt_ip_inp.pack(side=LEFT, padx=30, pady=(0, 5))
-        opt_rb_com = ttk.Radiobutton(opt_ip,
+
+        con_com = ttk.Frame(self.con_frame)
+        con_com.pack(fill=BOTH, expand=YES)
+        opt_rb_com = ttk.Radiobutton(con_com,
                                      text='COM',
                                      command=self.on_type_selection,
                                      variable=self.type_var,
                                      value='com')
-        opt_rb_com.pack(side=LEFT, padx=30, pady=(0, 10))
-        self.option_lf = ttk.LabelFrame(row0, text="Подключение к устройству")
-        self.option_lf.pack(fill=BOTH, expand=YES, pady=(0, 15), padx=15)
-        # self.option_lf.columnconfigure(0, weight=1)
-        # self.option_lf.rowconfigure(0, weight=1)
-        self.create_connection_buttons()
-        row1 = ttk.Frame(self)
-        row1.grid(row=1, column=0, sticky=NSEW)
-        self.option_lf_addr = ttk.LabelFrame(row1, text="Адрес Модуля")
-        self.option_lf_addr.pack(fill=BOTH, expand=YES, pady=(0, 15), padx=15)
-        # self.option_lf_addr.columnconfigure(0, weight=1)
-        # self.option_lf_addr.rowconfigure(0, weight=1)
-        self.create_get_addr_button()
-        self.option_lf_mod = ttk.LabelFrame(row1, text="Параметры модуля")
-        self.option_lf_mod.pack(fill=BOTH, expand=YES, pady=(0, 15), padx=15)
-        self.create_get_set_pars_buttons()
-        self.var_lf = {}
-        for i in range(4):
-            # var_name = f'mod{i + 1}'
-            col = ttk.Frame(self)
-            # col.grid(row=0, column=(i // 2) + 1, sticky=NSEW)
-            if i % 2 == 0:
-                col.grid(row=0, column=(i // 2) + 1, sticky=NSEW, pady=(15, 0), padx=15)
-            else:
-                col.grid(row=1, column=(i // 2) + 1, sticky=NSEW, padx=15)
-            mod_name = ttk.LabelFrame(col, text=i + 1)
-            mod_name.pack(fill=BOTH, expand=YES, pady=(0, 15))
-            self.make_device(i, mod_name)
+        opt_rb_com.pack(fill=BOTH, side=LEFT, expand=YES, padx=30, pady=(0, 5))
+
+        con_btn = ttk.Frame(self.con_frame)
+        con_btn.pack(fill=BOTH, expand=YES)
+        global btn_discon, btn_con
+        btn_con = ttk.Button(master=con_btn, text="Подключить", command=self.on_connect)
+        btn_con.pack(side=LEFT, padx=(30, 15), pady=15)
+        btn_discon = ttk.Button(master=con_btn, text="Отключить", command=self.on_disconnect, state=DISABLED)
+        btn_discon.pack(side=LEFT, padx=(0, 15), pady=15)
+
+        self.setvar('con_st', 'Нет подключения')
+        txt = ttk.Label(master=self.con_frame, textvariable='con_st')
+        txt.pack(fill=BOTH, expand=YES, padx=30, pady=(0, 15))
+
+        self.option_lf_mod = ttk.LabelFrame(header, text="Параметры модуля")
+        self.option_lf_mod.pack(fill=BOTH, expand=YES)
+
+        container = ttk.Frame(self.option_lf_mod)
+        container.pack(fill=BOTH, expand=YES)
+        global btn_get_par, btn_set_par, btn_set_par_test1, btn_set_par_test2
+        btn_get_par = ttk.Button(master=container, text="Получить", command=self.get_par, state=DISABLED)
+        btn_get_par.pack(side=LEFT, padx=15, pady=15)
+        btn_set_par = ttk.Button(master=container, text="Загрузить", command=self.set_par, state=DISABLED)
+        btn_set_par.pack(side=LEFT, padx=15, pady=15)
+        container2 = ttk.Frame(self.option_lf_mod)
+        container2.pack(fill=BOTH, expand=YES)
+        btn_set_par_test1 = ttk.Button(master=container2, text="Тест 1", command=lambda: self.set_par_test(True),
+                                       state=DISABLED)
+        btn_set_par_test1.pack(side=LEFT, padx=15, pady=15)
+        btn_set_par_test2 = ttk.Button(master=container2, text="Тест 2", command=lambda: self.set_par_test(False),
+                                       state=DISABLED)
+        btn_set_par_test2.pack(side=LEFT, padx=15, pady=15)
+        # self.var_lf = {}
+        # for i in range(4):
+        #     # var_name = f'mod{i + 1}'
+        #     col = ttk.Frame(self)
+        #     col.grid(row=1)
+        #     mod_name = ttk.LabelFrame(col, text=i + 1)
+        #     mod_name.pack(fill=X, expand=YES, pady=(0, 15))
+        #     self.make_device(i, mod_name)
+
         # col2 = ttk.Frame(self)
         # col2.grid(row=0, column=1, sticky=NSEW)
         # self.option_lf_pars = ttk.LabelFrame(col2, text="Параметры")
         # self.option_lf_pars.pack(fill=BOTH, side=TOP, expand=YES, pady=15, padx=15)
         # self.create_pars()
-        log_bar = ttk.Frame(self)
-        log_bar.grid(row=2, column=0, columnspan=3, sticky=NSEW)
+
+        log_bar = ttk.Frame(self, relief=SUNKEN)
+        log_bar.pack(expand=YES)
         self.option_lf_logs = ttk.LabelFrame(log_bar, text="Лог")
         self.option_lf_logs.pack(fill=BOTH, expand=YES, pady=15, padx=15)
         self.create_log_bar()
@@ -279,17 +293,7 @@ class Kappa(ttk.Frame):
     #                             variable='rf_switch')
     #     rf_sw.pack(side=LEFT, anchor=N, padx=(15, 5))
 
-    def create_connection_buttons(self):
-        container = ttk.Frame(self.option_lf)
-        container.pack(fill=X, expand=YES)
-        global btn_discon, btn_con
-        btn_con = ttk.Button(master=container, text="Подключить", command=self.on_connect)
-        btn_con.pack(side=LEFT, padx=15, pady=15)
-        btn_discon = ttk.Button(master=container, text="Отключить", command=self.on_disconnect, state=DISABLED)
-        btn_discon.pack(side=LEFT, padx=(0, 15), pady=15)
-        self.setvar('con_st', 'Нет подключения')
-        txt = ttk.Label(master=self.option_lf, textvariable='con_st')
-        txt.pack(fill=X, expand=YES, padx=15, pady=(0, 15))
+    # def create_connection_buttons(self):
 
     def create_get_addr_button(self):
         container = ttk.Frame(self.option_lf_addr)
@@ -301,20 +305,7 @@ class Kappa(ttk.Frame):
         txt = ttk.Label(master=self.option_lf_addr, textvariable='mod_addr')
         txt.pack(fill=X, expand=YES, padx=15, pady=(0, 15))
 
-    def create_get_set_pars_buttons(self):
-        container = ttk.Frame(self.option_lf_mod)
-        container.pack(fill=BOTH, expand=YES)
-        global btn_get_par, btn_set_par, btn_set_par_test1, btn_set_par_test2
-        btn_get_par = ttk.Button(master=container, text="Получить", command=self.get_par, state=DISABLED)
-        btn_get_par.pack(side=LEFT, padx=15, pady=15)
-        btn_set_par = ttk.Button(master=container, text="Загрузить", command=self.set_par, state=DISABLED)
-        btn_set_par.pack(side=LEFT, padx=15, pady=15)
-        container2 = ttk.Frame(self.option_lf_mod)
-        container2.pack(fill=BOTH, expand=YES)
-        btn_set_par_test1 = ttk.Button(master=container2, text="Тест 1", command=lambda: self.set_par_test(True), state=DISABLED)
-        btn_set_par_test1.pack(side=LEFT, padx=15, pady=15)
-        btn_set_par_test2 = ttk.Button(master=container2, text="Тест 2", command=lambda: self.set_par_test(False), state=DISABLED)
-        btn_set_par_test2.pack(side=LEFT, padx=15, pady=15)
+    # def create_get_set_pars_buttons(self):
 
     def on_type_selection(self):
         print(self.type_var.get())
