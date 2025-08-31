@@ -335,8 +335,9 @@ class Kappa(ttk.Frame):
         elif mode == 'ip':
             query = b'7e010013ff009db37f'
             query_par = b'7e010011ff00fddd7f'
+            query_par_freqs = b'7e010012ff00ad847f'
             responses = []
-            for i, q in enumerate([query, query_par]):
+            for i, q in enumerate([query, query_par_freqs, query_par]):
                 print(q)
                 logs_box.insert(END, "Запрос " + ' '.join(q.decode()[i:i + 2] for i in range(0, len(q.decode()), 2)) + "\n")
                 byte_data = bytes.fromhex(q.decode())
@@ -375,7 +376,15 @@ class Kappa(ttk.Frame):
                 # self.setvar('var_freq_max_' + str(i + 1), stop_freq)
                 modules.append({'mod_num': mod_number, 'start_freq': start_freq, 'stop_freq': stop_freq})
                 print(f'{mod_number}, {start_freq} - {stop_freq}')
-        resp_mod_data = r[1].hex()
+        resp_mod_freqs = r[1].hex()
+        print(resp_mod_freqs)
+        if resp_mod_freqs[:10] == '7e01001200':
+            lenght = resp_mod_freqs[10:12]
+            mod_freqs_datas = resp_mod_freqs[16:]
+            for i in range(int((int(lenght, 16) - 2)/20)):
+                mod_freq_data = mod_freqs_datas[i*20*2:(i+1)*20*2]
+                print(i, mod_freq_data)
+        resp_mod_data = r[2].hex()
         print(resp_mod_data)
         if resp_mod_data[:10] == '7e01001100':
             print(resp_mod_data[10:])
@@ -458,14 +467,6 @@ class Kappa(ttk.Frame):
         else:
             test_query = b'7e010020ff52fddd0a00200368036a0384038603b603b803d40328000f00fc082e09380974097e09a609c409280a28001e0020034c0400000000000000000000000028007300580220030000000000000000000000002800ca487f'
         try:
-            # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # sock.settimeout(5)
-            # sock.connect((self.ip.get(), 5000))
-            # print(f'Подключен к {self.ip.get()}:5000')
-            # l_text = 'ПОДКЛЮЧЕНО к ' + self.ip.get() + ':5000'
-            # self.setvar('con_st', l_text)
-            # btn_discon['state'] = NORMAL
-            # btn_set_par['state'] = NORMAL
             response = ''
             print(test_query)
             logs_box.insert(END,
@@ -506,18 +507,18 @@ class Kappa(ttk.Frame):
         if not self.auto:
             self.after_cancel(req)
 
-    def set_state_frame(self, widget, state):
-        try:
-            # if hasattr(widget, 'state') and callable(getattr(widget, 'state')):
-            #     if state == 'disabled':
-            #         widget.state(['disabled'])
-            #     else:
-            #         widget.state(['!disabled'])
-            # elif 'state' in widget.config():
-            widget.config(state=DISABLED)
-
-        except Exception as e:
-            print(e)
+    # def set_state_frame(self, widget, state):
+    #     try:
+    #         # if hasattr(widget, 'state') and callable(getattr(widget, 'state')):
+    #         #     if state == 'disabled':
+    #         #         widget.state(['disabled'])
+    #         #     else:
+    #         #         widget.state(['!disabled'])
+    #         # elif 'state' in widget.config():
+    #         widget.config(state=DISABLED)
+    #
+    #     except Exception as e:
+    #         print(e)
 
 
 if __name__ == '__main__':
